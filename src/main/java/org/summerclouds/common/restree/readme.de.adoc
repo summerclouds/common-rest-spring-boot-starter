@@ -1,0 +1,47 @@
+
+== REST-Tree Framework
+
+Ein weiterer REST Framework. Der unterschied von diesem
+zu anderen Frameworks ist, das die Rest-Knoten
+in einem Baum organisiert sind. Die Implementierung
+richtet sich nicht an Microservices, sondern an REST-APIs
+für Anwendungen.
+
+In RESTree werden Knoten unabhangig voneinander registriert
+und durch den Manager miteinander verbunden. Bei einem
+Aufruf werden alle Knoten durchlaufen und ggf. auf
+Rechte geprüft oder mit benötigten Objetken versehen.
+
+Beispiel:
+
+----
+
+POST /rest/opranization/1234/service/5555
+_action=validate
+
+----
+
+Wird zuerst auf den Knoten `organization` angewendet. Hier 
+wird die Organisation aus der Datenbank gelesen und
+am Aufruf hinterlegt. Wird die Organisation nicht gefunden
+oder der Zugriff nicht erlaubt bricht der Aufruf hier
+ab.
+
+Danach wird `service` geladen. Service hat bereits Zugriff
+auf das Organisations-Objekt und kann prüfen ob der Service
+dieser Organisation zugeordnet ist.
+
+Nun wird auf dem Konten `service` die Aktion `validate`
+aufgerufen, der prüften soll ob der Service gültig ist.
+Die Aktion hat bereits Organisation- und Service-Objekt
+geladen und kann direkt prüfen.
+
+Diese Implementierung unterscheidet sich grundlegend von
+den aktuellen *flachen* Varianten wie JAXRS und 
+ermöglicht komplexere Strukturen einfach bereitzustellen.
+
+
+
+
+
+

@@ -1,0 +1,32 @@
+
+== Rest Tracing Erweiterung
+
+Das Rest-Tracing erweitert das Tracing und HTTP Result 
+um informative parameter.
+
+=== Http Header
+
+Erweiterung der HTTP-Rückgabe um
+
+* X-Summer-TraceId
+* X-Summer-Subject
+
+=== Span
+
+Erweiterung um Details des HTTP-Requests. Die 
+Parameter erlauben es auch besser in Traces zu
+filtern. 
+
+* mvc.controller
+* request.part<nr>
+* request.param_<key>
+* request.header_<key>
+
+=== Konfiguration
+
+* org.summerclouds.rest.tracing.enabled=true - Aktivieren,
+Standart is 'true'
+* org.summerclouds.common.rest.tracePathParts=false
+* org.summerclouds.common.rest.traceParameters=false
+* org.summerclouds.common.rest.traceHeaders=false
+
