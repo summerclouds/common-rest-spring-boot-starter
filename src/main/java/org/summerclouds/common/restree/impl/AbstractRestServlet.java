@@ -15,8 +15,10 @@
  */
 package org.summerclouds.common.restree.impl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -28,10 +30,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.summerclouds.common.core.cfg.CfgInt;
+import org.summerclouds.common.core.cfg.CfgString;
 import org.summerclouds.common.core.error.AccessDeniedException;
 import org.summerclouds.common.core.error.MException;
 import org.summerclouds.common.core.error.MRuntimeException;
+import org.summerclouds.common.core.error.RC;
 import org.summerclouds.common.core.log.Log;
+import org.summerclouds.common.core.node.INode;
 import org.summerclouds.common.core.node.IReadProperties;
 import org.summerclouds.common.core.security.ISubject;
 import org.summerclouds.common.core.tool.MHttp;
@@ -66,15 +72,19 @@ public abstract class AbstractRestServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
+    private CfgString CFG_CORS_ORIGIN = new CfgString(getClass(), "corsOrigin", "*");
+    private CfgString CFG_CORS_HEADERS = new CfgString(getClass(), "corsHeaders", "*");
+    private CfgInt CFG_URL_REMOVE_PARTS = new CfgInt(getClass(), "urlRemoveParts", 2);
+    
 	public abstract RestApi getRestService();
 
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// System.out.println(">>> " + req.getPathInfo());
-		response.setHeader("Access-Control-Allow-Origin", "*");
-		response.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, HEAD, OPTIONS");
-		response.setHeader("Access-Control-Allow-Headers", "*");
+        response.setHeader("Access-Control-Allow-Origin", CFG_CORS_ORIGIN.value());
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, HEAD, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", CFG_CORS_HEADERS.value());
 		response.setHeader("Access-Control-Max-Age", "0");
 		response.setHeader("Cache-Control", "no-store");
 		response.setHeader("Vary", "*");
@@ -99,81 +109,6 @@ public abstract class AbstractRestServlet extends HttpServlet {
 				return;
 			}
 
-//			// tracing
-//			SpanContext parentSpanCtx = null;
-//			if (CFG_TRACE_FOLLOW.value()) {
-//				parentSpanCtx = MTracing.get().tracer().extract(Format.Builtin.HTTP_HEADERS,
-//						new TraceExtractRest(request));
-//			}
-//			String trace = request.getParameter("_trace");
-//			if (MString.isEmpty(trace))
-//				trace = CFG_TRACE_ACTIVE.value();
-//
-//			if (parentSpanCtx == null) {
-//				scope = MTracing.start("rest", trace);
-//			} else if (parentSpanCtx != null) {
-//				Span span = ITracer.get().tracer().buildSpan("rest").asChildOf(parentSpanCtx).start();
-//				scope = ITracer.get().activate(span);
-//			}
-//
-//			if (MString.isSet(trace))
-//				ITracer.get().activate(trace);
-//
-//			if (scope != null) {
-//				// method
-//				String method = request.getParameter("_method");
-//				if (method == null)
-//					method = request.getMethod();
-//				method = method.toUpperCase();
-//				Span span = ITracer.get().current();
-//				Tags.SPAN_KIND.set(span, Tags.SPAN_KIND_SERVER);
-//				Tags.HTTP_METHOD.set(span, method);
-//				Tags.HTTP_URL.set(span, request.getRequestURL().toString());
-//				span.setTag("http.remote", getRestService().getRemoteAddress(request));
-//				String pi = request.getPathInfo();
-//				if (CFG_TRACE_PATH.value()) {
-//					if (pi != null) {
-//						int i = 0;
-//						for (String part : pi.split("/")) {
-//							span.setTag("urlpart" + i, part);
-//							i++;
-//						}
-//					}
-//				}
-//				if (CFG_TRACE_PARAM.value()) {
-//					Map<String, String[]> map = request.getParameterMap();
-//					if (map != null) {
-//						for (Map.Entry<String, String[]> me : map.entrySet())
-//							span.setTag("param_" + me.getKey(), arrayToString(me.getValue()));
-//					}
-//				}
-//				if (CFG_HEADER_TAGS.value()) {
-//					Enumeration<String> enu = request.getHeaderNames();
-//					while (enu.hasMoreElements()) {
-//						String name = enu.nextElement();
-//						StringBuilder sb = null;
-//						if ("Authorization".equals(name)) {
-//							sb = new StringBuilder();
-//							String v = MString.beforeIndex(request.getHeader(name), ' ');
-//							sb.append(v);
-//							sb.append(" ***");
-//						} else {
-//							Enumeration<String> enu2 = request.getHeaders(name);
-//							while (enu2.hasMoreElements()) {
-//								String value = enu2.nextElement();
-//								if (sb == null)
-//									sb = new StringBuilder();
-//								else
-//									sb.append(",");
-//								sb.append(value);
-//							}
-//						}
-//						if (sb != null)
-//							span.setTag("header_" + name, sb.toString());
-//					}
-//				}
-//			}
-
 			// method
 			String method = request.getParameter("_method");
 			if (method == null)
@@ -189,16 +124,25 @@ public abstract class AbstractRestServlet extends HttpServlet {
 
 			// parts of path
 			List<String> parts = new LinkedList<String>(Arrays.asList(path.split("/")));
-			if (parts.size() == 0)
-				return; // XXX
-			parts.remove(0); // [empty]
-			parts.remove(0); // rest
+			if (parts.size() < CFG_URL_REMOVE_PARTS.value()) {
+				response.sendError(RC.NOT_FOUND);
+				return;
+			}
+			for (int i = 0; i < CFG_URL_REMOVE_PARTS.value(); i++)
+				parts.remove(0); // [empty], 'rest'
 
 			Map<String, String[]> parameters = request.getParameterMap();
-			// check for payload and overlay parameters
-			// TODO implement payload
-			// String body = req.getReader().lines()
-			// .reduce("", (accumulator, actual) -> accumulator + actual);
+			if (method.equals(MHttp.METHOD_POST) || method.equals(MHttp.METHOD_PUT) || method.equals(MHttp.METHOD_DELETE)) {
+				try {
+					String payload = getBody(request);
+					if (MString.isSet(payload)) {
+						INode node = INode.readNodeFromString(payload);
+						// XXX
+					}
+				} catch (Throwable t) {
+					log.d(t);
+				}
+			}
 
 			// create call context object
 			CallContext callContext = new CallContext(request, response,
@@ -308,16 +252,40 @@ public abstract class AbstractRestServlet extends HttpServlet {
 		}
 	}
 
-//	private String arrayToString(String[] value) {
-//		if (value == null)
-//			return "null";
-//		if (value.length == 0)
-//			return "";
-//		if (value.length == 1)
-//			return value[0];
-//		return Arrays.toString(value);
-//	}
+	public static String getBody(HttpServletRequest request) throws IOException {
 
+	    String body = null;
+	    StringBuilder stringBuilder = new StringBuilder();
+	    BufferedReader bufferedReader = null;
+
+	    try {
+	        InputStream inputStream = request.getInputStream();
+	        if (inputStream != null) {
+	            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+	            char[] charBuffer = new char[128];
+	            int bytesRead = -1;
+	            while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+	                stringBuilder.append(charBuffer, 0, bytesRead);
+	            }
+	        } else {
+	            stringBuilder.append("");
+	        }
+	    } catch (IOException ex) {
+	        throw ex;
+	    } finally {
+	        if (bufferedReader != null) {
+	            try {
+	                bufferedReader.close();
+	            } catch (IOException ex) {
+	                throw ex;
+	            }
+	        }
+	    }
+
+	    body = stringBuilder.toString();
+	    return body;
+	}
+	
 	public boolean isPublicPath(String path) {
 		return path.startsWith(PUBLIC_PATH_START) || path.equals(PUBLIC_PATH);
 	}
@@ -404,13 +372,6 @@ public abstract class AbstractRestServlet extends HttpServlet {
                 } catch (Throwable t2) {}
             }
 			
-//			if (CFG_TRACE_RETURN.value() && ITracer.get().current() != null)
-//				try {
-//					ITracer.get().tracer().inject(ITracer.get().current().context(), Format.Builtin.TEXT_MAP,
-//							new TraceJsonMap(json, "_"));
-//				} catch (Throwable t2) {
-//					log.d(t2);
-//				}
 			resp.setContentType("application/json");
 			m.writeValue(w, json);
 
