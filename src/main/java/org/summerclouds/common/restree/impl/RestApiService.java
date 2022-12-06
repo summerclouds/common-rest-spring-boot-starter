@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 import org.summerclouds.common.core.cfg.BeanRef;
+import org.summerclouds.common.core.lang.SummerApplicationLifecycle;
 import org.summerclouds.common.core.tool.MSpring;
 import org.summerclouds.common.restree.CallContext;
 import org.summerclouds.common.restree.api.Node;
@@ -14,11 +15,10 @@ import org.summerclouds.common.restree.api.RestNodeService;
 import org.summerclouds.common.restree.api.RestResult;
 import org.summerclouds.common.restree.api.RestSecurityService;
 
-public class RestApiService extends AbstractRestApi {
+public class RestApiService extends AbstractRestApi implements SummerApplicationLifecycle {
 
     public BeanRef<RestSecurityService> securityService = new BeanRef<>(RestSecurityService.class);
 
-	@PostConstruct
 	public void setup() {
 		log().i("Start RestApiService");
 		reset();
@@ -101,4 +101,13 @@ public class RestApiService extends AbstractRestApi {
         return s.checkSecurityResult(callContext, result);
 	}
 
+    @Override
+    public void onSummerApplicationStart() throws Exception {
+        setup();
+    }
+
+    @Override
+    public void onSummerApplicationStop() throws Exception {
+
+    }
 }
