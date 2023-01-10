@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2022 Mike Hummel (mh@mhus.de)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.summerclouds.common.rest.operation;
 
 import java.util.ArrayList;
@@ -20,72 +35,77 @@ import org.summerclouds.common.core.operation.cmd.CmdOperation;
 import org.summerclouds.common.core.util.EnumerationIterator;
 
 @RestController
-@ConditionalOnProperty(name="org.summerclouds.operations.enabled",havingValue="true")
+@ConditionalOnProperty(name = "org.summerclouds.operations.enabled", havingValue = "true")
 public class OperationController {
 
-	@Autowired
-	private OperationManager manager;
-	
-//	@RequestMapping(value="cmd", method=RequestMethod.POST)
-//	public void cmd(HttpServletResponse response) {
-//		ServletOutputStream os = response.getOutputStream();
-//		manager.execute();
-//	}
-	
-	/**
-	 * Execute operation
-	 * @param response
-	 * @return 
-	 * @throws Exception 
-	 */
-	@PostMapping("/operation/{uri}")
-	public ServiceOperationResult operationExecute(@PathVariable("uri") String uri, HttpServletRequest request) throws Exception {
-		uri = "operation://" + uri;
-		MNode node = new MNode();
-		for (String key : new EnumerationIterator<String>(request.getParameterNames())) {
-			String value = request.getParameter(key);
-			node.setString(key, value);
-		}
-		OperationResult res = manager.execute(uri, node);
-		return new ServiceOperationResult(res);
-	}
+    @Autowired private OperationManager manager;
 
-	@GetMapping("/operation")
-	public String[] operationList() {
-		return manager.getOperations();
-	}
+    //	@RequestMapping(value="cmd", method=RequestMethod.POST)
+    //	public void cmd(HttpServletResponse response) {
+    //		ServletOutputStream os = response.getOutputStream();
+    //		manager.execute();
+    //	}
 
-	@GetMapping("/operation/{uri}")
-	public ServiceOperationDescription operationDescription(@PathVariable("uri") String uri) throws Exception {
-		uri = "operation://" + uri;
-		return new ServiceOperationDescription(manager.getDescription(uri));
-	}
+    /**
+     * Execute operation
+     *
+     * @param response
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/operation/{uri}")
+    public ServiceOperationResult operationExecute(
+            @PathVariable("uri") String uri, HttpServletRequest request) throws Exception {
+        uri = "operation://" + uri;
+        MNode node = new MNode();
+        for (String key : new EnumerationIterator<String>(request.getParameterNames())) {
+            String value = request.getParameter(key);
+            node.setString(key, value);
+        }
+        OperationResult res = manager.execute(uri, node);
+        return new ServiceOperationResult(res);
+    }
 
-	@GetMapping("/cmd")
-	public List<ServiceOperationDescription> cmdGet() throws Exception {
-		List<ServiceOperationDescription> list  = new ArrayList<>();
-		for (String name : manager.getCommands()) {
-			OperationDescription desc = manager.getDescription(name);
-			list.add(new ServiceOperationDescription(desc).setPath(name.substring(6)));
-		}
+    @GetMapping("/operation")
+    public String[] operationList() {
+        return manager.getOperations();
+    }
 
-		return list;
-	}
-		
-	@PostMapping("/cmd/{uri}")
-	public void cmdExecute(@PathVariable("uri") String uri, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		MNode node = new MNode();
-		for (String key : new EnumerationIterator<String>(request.getParameterNames())) {
-			String value = request.getParameter(key);
-			node.setString(key, value);
-		}
-		node.put(CmdOperation.PARAMETER_OUTPUT_STREAM, response.getOutputStream());
-		
-		uri = "cmd://" + uri;
-		OperationResult res = manager.execute(uri, node);
-		if (!response.isCommitted() && !res.isSuccessful()) {
-			response.sendError(res.getReturnCode(), res.getMessage());
-		}
-	}
-	
+    @GetMapping("/operation/{uri}")
+    public ServiceOperationDescription operationDescription(@PathVariable("uri") String uri)
+            throws Exception {
+        uri = "operation://" + uri;
+        return new ServiceOperationDescription(manager.getDescription(uri));
+    }
+
+    @GetMapping("/cmd")
+    public List<ServiceOperationDescription> cmdGet() throws Exception {
+        List<ServiceOperationDescription> list = new ArrayList<>();
+        for (String name : manager.getCommands()) {
+            OperationDescription desc = manager.getDescription(name);
+            list.add(new ServiceOperationDescription(desc).setPath(name.substring(6)));
+        }
+
+        return list;
+    }
+
+    @PostMapping("/cmd/{uri}")
+    public void cmdExecute(
+            @PathVariable("uri") String uri,
+            HttpServletRequest request,
+            HttpServletResponse response)
+            throws Exception {
+        MNode node = new MNode();
+        for (String key : new EnumerationIterator<String>(request.getParameterNames())) {
+            String value = request.getParameter(key);
+            node.setString(key, value);
+        }
+        node.put(CmdOperation.PARAMETER_OUTPUT_STREAM, response.getOutputStream());
+
+        uri = "cmd://" + uri;
+        OperationResult res = manager.execute(uri, node);
+        if (!response.isCommitted() && !res.isSuccessful()) {
+            response.sendError(res.getReturnCode(), res.getMessage());
+        }
+    }
 }

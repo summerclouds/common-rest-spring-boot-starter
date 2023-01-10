@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 Mike Hummel (mh@mhus.de)
+ * Copyright (C) 2022 Mike Hummel (mh@mhus.de)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class RestRegistry extends MLog {
     public void checkPermission(
             CallContext context, RestNodeService next, String ident, String action) {
 
-    	if (!MSecurity.hasPermission("de.mhus.rest.core.node", action, ident ))
+        if (!MSecurity.hasPermission("de.mhus.rest.core.node", action, ident))
             throw new AccessDeniedException("access denied (1)");
     }
 }

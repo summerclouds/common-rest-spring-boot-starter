@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 Mike Hummel (mh@mhus.de)
+ * Copyright (C) 2022 Mike Hummel (mh@mhus.de)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,22 +124,24 @@ public abstract class AbstractNode extends MLog implements RestNodeService {
             } catch (Throwable t) {
                 log().d(actionName, callContext, t);
             }
-        } 
-// -- deprecated - do not support any more        
-//        else { 
-//            String methodName = "on" + MPojo.toFunctionName(callContext.getAction(), true, null);
-//            try {
-//                JsonResult result = new JsonResult();
-//                Method method =
-//                        getClass().getMethod(methodName, JsonResult.class, CallContext.class);
-//                method.invoke(this, result, callContext);
-//                return result;
-//            } catch (java.lang.NoSuchMethodException e) {
-//                log().d("action method not found", methodName);
-//            } catch (Throwable t) {
-//                log().d(methodName, callContext, t);
-//            }
-//        }
+        }
+        // -- deprecated - do not support any more
+        //        else {
+        //            String methodName = "on" + MPojo.toFunctionName(callContext.getAction(), true,
+        // null);
+        //            try {
+        //                JsonResult result = new JsonResult();
+        //                Method method =
+        //                        getClass().getMethod(methodName, JsonResult.class,
+        // CallContext.class);
+        //                method.invoke(this, result, callContext);
+        //                return result;
+        //            } catch (java.lang.NoSuchMethodException e) {
+        //                log().d("action method not found", methodName);
+        //            } catch (Throwable t) {
+        //                log().d(methodName, callContext, t);
+        //            }
+        //        }
         return null;
     }
 

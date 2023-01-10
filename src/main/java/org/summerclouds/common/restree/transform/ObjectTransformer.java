@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 Mike Hummel (mh@mhus.de)
+ * Copyright (C) 2022 Mike Hummel (mh@mhus.de)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,8 @@ public interface ObjectTransformer {
             try {
                 return (ObjectTransformer) value[0].getConstructor().newInstance();
             } catch (Throwable t) {
-                Log.getLog(ObjectTransformer.class).f("create transformer failed", owner, value[0], t);
+                Log.getLog(ObjectTransformer.class)
+                        .f("create transformer failed", owner, value[0], t);
                 return new TransformList(); // empty
             }
         } else {
@@ -44,7 +45,7 @@ public interface ObjectTransformer {
                     ObjectTransformer t = (ObjectTransformer) v.getConstructor().newInstance();
                     out.add(t);
                 } catch (Throwable t) {
-                	Log.getLog(ObjectTransformer.class).f("create transformer failed", owner, v, t);
+                    Log.getLog(ObjectTransformer.class).f("create transformer failed", owner, v, t);
                 }
             }
             return out;

@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2022 Mike Hummel (mh@mhus.de)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.summerclouds.common.rest;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,63 +33,90 @@ import org.summerclouds.common.junit.TestCase;
 import org.summerclouds.common.rest.internal.SpringSummerCloudsRestAutoConfiguration;
 import org.summerclouds.common.rest.operation.OperationController;
 
-@SpringBootTest(classes = {
-		SpringSummerCloudsCoreAutoConfiguration.class,
-		SpringSummerCloudsRestAutoConfiguration.class,
-		TestingWebApplication.class,
-		OperationController.class
-		},
-properties = { 
-		"org.summerclouds.scan.packages=org.summerclouds.common.rest.operation",
-		"org.summerclouds.operations.enabled=true",
-}
-)
+@SpringBootTest(
+        classes = {
+            SpringSummerCloudsCoreAutoConfiguration.class,
+            SpringSummerCloudsRestAutoConfiguration.class,
+            TestingWebApplication.class,
+            OperationController.class
+        },
+        properties = {
+            "org.summerclouds.scan.packages=org.summerclouds.common.rest.operation",
+            "org.summerclouds.operations.enabled=true",
+        })
 @AutoConfigureMockMvc
 public class OperationTest extends TestCase {
 
-	@Autowired
-	private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-	@Test
-	public void testOperationList() throws Exception {
-		MvcResult ret = this.mockMvc.perform(get("/operation")).andDo(print()).andExpect(status().isOk()).andReturn();
-		String content = ret.getResponse().getContentAsString();
-		assertTrue(content.contains("operation://org.summerclouds.common.rest.operation.cmd1:0.0.0") );
-		assertTrue(content.contains("operation://org.summerclouds.common.rest.operation.operation1:0.0.0") );
-	}
-	
-	@Test
-	public void testOperationDescription() throws Exception {
-		this.mockMvc.perform(get("/operation/org.summerclouds.common.rest.operation.operation1:0.0.0")).andDo(print()).andExpect(status().isOk());
-	}
-	
-	@Test
-	public void testOperationExecute() throws Exception {
-		this.mockMvc.perform(post("/operation/org.summerclouds.common.rest.operation.operation1:0.0.0")).andDo(print()).andExpect(status().isOk())
-		.andExpect(jsonPath("$.message").value("[200,\"ok\"]"));
-	}
-	
-	@Test
-	public void testCommandList() throws Exception {
-		MvcResult ret = this.mockMvc.perform(get("/cmd")).andDo(print()).andExpect(status().isOk()).andReturn();
-		String content = ret.getResponse().getContentAsString();
-		assertTrue(content.contains("\"path\":\"cmd1\"") );
-		assertTrue(content.contains("\"version\":\"0.0.0\"") );
-	}
-	
-	@Test
-	public void testCommandExecute() throws Exception {
-		String value = "t" + Math.random();
-		MvcResult ret = this.mockMvc.perform(post("/cmd/cmd1").param("opt", value )).andDo(print()).andExpect(status().isOk()).andReturn();
-		String content = ret.getResponse().getContentAsString();
-		assertTrue(content.contains("Opt: " + value));
-	}
-	
-	@Test
-	public void testCommandError() throws Exception {
-		MvcResult ret = this.mockMvc.perform(post("/cmd/cmd1").param("opt", "error" )).andDo(print()).andExpect(status().is(400)).andReturn();
-		String content = ret.getResponse().getContentAsString();
-		assertTrue(content.contains("[400,\"test error\"]"));
-	}
-	
+    @Test
+    public void testOperationList() throws Exception {
+        MvcResult ret =
+                this.mockMvc
+                        .perform(get("/operation"))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String content = ret.getResponse().getContentAsString();
+        assertTrue(
+                content.contains("operation://org.summerclouds.common.rest.operation.cmd1:0.0.0"));
+        assertTrue(
+                content.contains(
+                        "operation://org.summerclouds.common.rest.operation.operation1:0.0.0"));
+    }
+
+    @Test
+    public void testOperationDescription() throws Exception {
+        this.mockMvc
+                .perform(get("/operation/org.summerclouds.common.rest.operation.operation1:0.0.0"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testOperationExecute() throws Exception {
+        this.mockMvc
+                .perform(post("/operation/org.summerclouds.common.rest.operation.operation1:0.0.0"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("[200,\"ok\"]"));
+    }
+
+    @Test
+    public void testCommandList() throws Exception {
+        MvcResult ret =
+                this.mockMvc
+                        .perform(get("/cmd"))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String content = ret.getResponse().getContentAsString();
+        assertTrue(content.contains("\"path\":\"cmd1\""));
+        assertTrue(content.contains("\"version\":\"0.0.0\""));
+    }
+
+    @Test
+    public void testCommandExecute() throws Exception {
+        String value = "t" + Math.random();
+        MvcResult ret =
+                this.mockMvc
+                        .perform(post("/cmd/cmd1").param("opt", value))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String content = ret.getResponse().getContentAsString();
+        assertTrue(content.contains("Opt: " + value));
+    }
+
+    @Test
+    public void testCommandError() throws Exception {
+        MvcResult ret =
+                this.mockMvc
+                        .perform(post("/cmd/cmd1").param("opt", "error"))
+                        .andDo(print())
+                        .andExpect(status().is(400))
+                        .andReturn();
+        String content = ret.getResponse().getContentAsString();
+        assertTrue(content.contains("[400,\"test error\"]"));
+    }
 }

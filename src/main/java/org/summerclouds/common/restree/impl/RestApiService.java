@@ -1,9 +1,23 @@
+/**
+ * Copyright (C) 2022 Mike Hummel (mh@mhus.de)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.summerclouds.common.restree.impl;
 
 import java.io.IOException;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 import org.summerclouds.common.core.cfg.BeanRef;
@@ -19,16 +33,16 @@ public class RestApiService extends AbstractRestApi implements SummerApplication
 
     public BeanRef<RestSecurityService> securityService = new BeanRef<>(RestSecurityService.class);
 
-	public void setup() {
-		log().i("Start RestApiService");
-		reset();
-	}
-	
-	@Override
-	public void reset() {
-		register.getRegistry().clear();
-		Map<String, RestNodeService> map = MSpring.getBeansOfType(RestNodeService.class);
-		for (RestNodeService  service : map.values()) {
+    public void setup() {
+        log().i("Start RestApiService");
+        reset();
+    }
+
+    @Override
+    public void reset() {
+        register.getRegistry().clear();
+        Map<String, RestNodeService> map = MSpring.getBeansOfType(RestNodeService.class);
+        for (RestNodeService service : map.values()) {
             for (String x : service.getParentNodeCanonicalClassNames()) {
                 if (x != null) {
                     if (x.length() > 0
@@ -45,17 +59,16 @@ public class RestApiService extends AbstractRestApi implements SummerApplication
                     register.getRegistry().put(key, service);
                 }
             }
+        }
+    }
 
-		}
-	}
-
-	@Override
-	public void checkPermission(Node item, String action, CallContext callContext) {
+    @Override
+    public void checkPermission(Node item, String action, CallContext callContext) {
         register.checkPermission(callContext, action);
-	}
+    }
 
-	@Override
-	public boolean checkSecurityPrepared(CallContext callContext) {
+    @Override
+    public boolean checkSecurityPrepared(CallContext callContext) {
         RestSecurityService s = securityService.bean();
         if (s == null) {
             if (REQUIRE_SECURITY.value()) {
@@ -66,10 +79,10 @@ public class RestApiService extends AbstractRestApi implements SummerApplication
             return true;
         }
         return s.checkSecurityPrepared(callContext);
-	}
+    }
 
-	@Override
-	public boolean checkSecurityRequest(Object request, Object response) {
+    @Override
+    public boolean checkSecurityRequest(Object request, Object response) {
         RestSecurityService s = securityService.bean();
         if (s == null) {
             if (REQUIRE_SECURITY.value()) {
@@ -85,10 +98,10 @@ public class RestApiService extends AbstractRestApi implements SummerApplication
             return true;
         }
         return s.checkSecurityRequest(request, response);
-	}
+    }
 
-	@Override
-	public boolean checkSecurityResult(CallContext callContext, RestResult result) {
+    @Override
+    public boolean checkSecurityResult(CallContext callContext, RestResult result) {
         RestSecurityService s = securityService.bean();
         if (s == null) {
             if (REQUIRE_SECURITY.value()) {
@@ -99,7 +112,7 @@ public class RestApiService extends AbstractRestApi implements SummerApplication
             return true;
         }
         return s.checkSecurityResult(callContext, result);
-	}
+    }
 
     @Override
     public void onSummerApplicationStart() throws Exception {
@@ -107,7 +120,5 @@ public class RestApiService extends AbstractRestApi implements SummerApplication
     }
 
     @Override
-    public void onSummerApplicationStop() throws Exception {
-
-    }
+    public void onSummerApplicationStop() throws Exception {}
 }

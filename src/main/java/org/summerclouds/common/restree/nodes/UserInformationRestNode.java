@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020 Mike Hummel (mh@mhus.de)
+ * Copyright (C) 2022 Mike Hummel (mh@mhus.de)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.summerclouds.common.restree.CallContext;
 import org.summerclouds.common.restree.annotation.RestNode;
 import org.summerclouds.common.restree.node.SingleObjectNode;
 
-//@ServiceComponent(service = RestNodeService.class)
+// @ServiceComponent(service = RestNodeService.class)
 @RestNode(parentNode = PublicRestNode.class, name = "uid")
 public class UserInformationRestNode extends SingleObjectNode<UserInformation> {
 
