@@ -33,7 +33,7 @@ public interface ObjectTransformer {
         if (value.length == 1) {
             try {
                 return (ObjectTransformer) value[0].getConstructor().newInstance();
-            } catch (Throwable t) {
+            } catch (Exception t) {
                 Log.getLog(ObjectTransformer.class)
                         .f("create transformer failed", owner, value[0], t);
                 return new TransformList(); // empty
@@ -44,7 +44,7 @@ public interface ObjectTransformer {
                 try {
                     ObjectTransformer t = (ObjectTransformer) v.getConstructor().newInstance();
                     out.add(t);
-                } catch (Throwable t) {
+                } catch (Exception t) {
                     Log.getLog(ObjectTransformer.class).f("create transformer failed", owner, v, t);
                 }
             }

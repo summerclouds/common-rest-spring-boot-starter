@@ -15,7 +15,7 @@
  */
 package org.summerclouds.common.restree.impl;
 
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.WebServlet;
 
 import org.summerclouds.common.core.cfg.BeanRef;
 import org.summerclouds.common.restree.api.RestApi;

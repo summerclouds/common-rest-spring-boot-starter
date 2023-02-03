@@ -17,9 +17,9 @@ package org.summerclouds.common.rest;
 
 import java.util.Locale;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -54,11 +54,11 @@ public class RestResponseStatusExceptionResolver extends AbstractHandlerExceptio
         try {
             ISpan span = MTracing.current();
             if (span != null) span.setError(ex);
-        } catch (Throwable t) {
+        } catch (Exception t) {
         }
         try {
             log.e("rest request {1} {2} failed", request.getMethod(), request.getPathInfo(), ex);
-        } catch (Throwable t) {
+        } catch (Exception t) {
         }
         try {
             ObjectNode out = MJson.createObjectNode();
@@ -80,8 +80,8 @@ public class RestResponseStatusExceptionResolver extends AbstractHandlerExceptio
 
             } else if (ex instanceof ResponseStatusException) {
                 ResponseStatusException result = (ResponseStatusException) ex;
-                response.setStatus(result.getRawStatusCode());
-                out.put("_error", result.getRawStatusCode());
+                response.setStatus(result.getStatusCode().value());
+                out.put("_error", result.getStatusCode().value());
                 out.put("_errorMessage", result.getLocalizedMessage());
                 out.put("_errorString", result.getMessage());
             } else {
@@ -93,13 +93,13 @@ public class RestResponseStatusExceptionResolver extends AbstractHandlerExceptio
                 try {
                     JsonNode array = MJson.load(msg);
                     out.set("_errorArray", array);
-                } catch (Throwable t) {
+                } catch (Exception t) {
                 }
             }
             ServletOutputStream os = response.getOutputStream();
             MJson.write(out, os);
             os.flush();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             t.printStackTrace(); // XXX
         }
 

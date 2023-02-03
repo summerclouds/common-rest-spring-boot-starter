@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.summerclouds.common.core.cfg.CfgBoolean;
 import org.summerclouds.common.core.log.MLog;

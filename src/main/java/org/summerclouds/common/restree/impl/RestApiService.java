@@ -18,7 +18,7 @@ package org.summerclouds.common.restree.impl;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.summerclouds.common.core.cfg.BeanRef;
 import org.summerclouds.common.core.lang.SummerApplicationLifecycle;

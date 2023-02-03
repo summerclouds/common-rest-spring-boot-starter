@@ -18,8 +18,8 @@ package org.summerclouds.common.rest.operation;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -49,7 +49,6 @@ public class OperationController {
     /**
      * Execute operation
      *
-     * @param response
      * @return
      * @throws Exception
      */

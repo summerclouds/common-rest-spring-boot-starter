@@ -121,7 +121,7 @@ public abstract class AbstractNode extends MLog implements RestNodeService {
                 } else {
                     log().w("action unknown", actionName);
                 }
-            } catch (Throwable t) {
+            } catch (Exception t) {
                 log().d(actionName, callContext, t);
             }
         }
@@ -138,7 +138,7 @@ public abstract class AbstractNode extends MLog implements RestNodeService {
         //                return result;
         //            } catch (java.lang.NoSuchMethodException e) {
         //                log().d("action method not found", methodName);
-        //            } catch (Throwable t) {
+        //            } catch (Exception t) {
         //                log().d(methodName, callContext, t);
         //            }
         //        }

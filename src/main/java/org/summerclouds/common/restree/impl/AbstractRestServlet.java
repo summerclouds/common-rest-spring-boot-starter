@@ -25,10 +25,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.summerclouds.common.core.cfg.CfgInt;
 import org.summerclouds.common.core.cfg.CfgString;
@@ -140,7 +140,7 @@ public abstract class AbstractRestServlet extends HttpServlet {
                         INode node = INode.readNodeFromString(payload);
                         // XXX
                     }
-                } catch (Throwable t) {
+                } catch (Exception t) {
                     log.d(t);
                 }
             }
@@ -249,7 +249,7 @@ public abstract class AbstractRestServlet extends HttpServlet {
                     response.setContentType(res.getContentType(callContext));
                     res.write(callContext, response.getWriter());
                 }
-            } catch (Throwable t) {
+            } catch (Exception t) {
                 log.d(t);
                 sendError(
                         request,
@@ -283,7 +283,7 @@ public abstract class AbstractRestServlet extends HttpServlet {
         } catch (MRuntimeException t) {
             log.d(t);
             sendError(request, response, t.getReturnCode(), t.getMessage(), t, null, subject);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             log.d(t);
             sendError(
                     request,
@@ -434,7 +434,7 @@ public abstract class AbstractRestServlet extends HttpServlet {
                 try {
                     JsonNode errArray = MJson.load(errMsg);
                     json.set("_errorArray", errArray);
-                } catch (Throwable t2) {
+                } catch (Exception t2) {
                 }
             }
 
